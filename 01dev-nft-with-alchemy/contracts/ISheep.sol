@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 /// @custom:security-contact lin
 contract ISheep is ERC721, ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
+    uint256 constant MAX_SUPPLY = 10000;
 
     Counters.Counter private _tokenIdCounter;
 
@@ -18,6 +19,7 @@ contract ISheep is ERC721, ERC721Enumerable, ERC721URIStorage {
 
     function safeMint(address to, string memory uri) public {
         uint256 tokenId = _tokenIdCounter.current();
+        require(tokenId >= MAX_SUPPLY, "no more than MAX_SUPPLY");
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
