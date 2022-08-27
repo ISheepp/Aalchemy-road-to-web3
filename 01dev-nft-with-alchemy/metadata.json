@@ -1,0 +1,25 @@
+{
+    "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.", 
+    "external_url": "https://openseacreatures.io/3", 
+    "image": "https://ipfs.filebase.io/ipfs/QmQWqRRPyMrjE6duaZpd3nXL9gCXescTFZCiDgRRucxTeJ", 
+    "name": "ISheep first ERC721 NFT",
+    "attributes": [
+        {
+          "trait_type": "hobby", 
+          "value": "Badminton"
+        }, 
+        {
+          "trait_type": "Eyes", 
+          "value": "Big"
+        }, 
+        {
+          "trait_type": "Mouth", 
+          "value": "Surprised"
+        }, 
+        {
+          "trait_type": "Level", 
+          "value": 5
+        }
+      ]
+    
+  }
