@@ -16,3 +16,6 @@
 2. `getMemos()`: 获取留言
 3. `withdrawTips()`: 提现
 
+## 挑战
+
+1. 支持提现到不同的地址（修改owner，只允许合约创建者）（新建一个方法允许更新owner address）
