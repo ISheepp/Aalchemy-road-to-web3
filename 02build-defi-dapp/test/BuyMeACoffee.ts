@@ -40,21 +40,22 @@ describe("测试BuyMeACoffee合约", () => {
         const contractBalance = await ethers.provider.getBalance(contract.address);
         // 测试合约的balance是否一致
         expect('0.01').to.equal(ethers.utils.formatEther(contractBalance));
-        // 测试event
-
-        const receipt = await ethers.provider.getTransactionReceipt(result.hash);
-        const interface1 = new ethers.utils.Interface(["event NewMemo(address indexed from,uint256 timestamp,string name,string message);"]);
-        const data = receipt.logs[0].data;
-        const topics = receipt.logs[0].topics;
+        // 测试event 使用原始ethers测试
+        
+        // const receipt = await ethers.provider.getTransactionReceipt(result.hash);
+        // const interface1 = new ethers.utils.Interface(["event NewMemo(address indexed from,uint256 timestamp,string name,string message);"]);
+        // const data = receipt.logs[0].data;
+        // const topics = receipt.logs[0].topics;
         // console.log(receipt.logs);
-        
-        const event = interface1.decodeEventLog("NewMemo", data, topics);
-        console.log(event);
-        
-        
+        // const event = interface1.decodeEventLog("NewMemo", data, topics);
+        // console.log(event);
         // expect(event.from).to.equal();
         // expect(event.to).to.equal(<addr-of - receipent >);
         // expect(event.amount.toString()).to.equal(<amount-BigNumber >.toString());
+
+        // 使用chai-matcher测试event
+        await expect(result).to.emit(contract, "NewMemo")
+            .withArgs(other1.address,anyValue,"ISheep","hi i love you");
 
 
     })

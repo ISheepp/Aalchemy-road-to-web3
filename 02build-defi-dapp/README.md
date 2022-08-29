@@ -1,4 +1,4 @@
-# 制作一个decentralized **爱发电website**
+# 制作一个 decentralized **爱发电 website**
 
 ## 简介
 

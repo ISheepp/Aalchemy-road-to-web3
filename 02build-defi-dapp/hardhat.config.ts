@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 import "dotenv/config";
 import { HardhatUserConfig } from "hardhat/types";
 import { NetworkUserConfig } from "hardhat/types";
-
+import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
