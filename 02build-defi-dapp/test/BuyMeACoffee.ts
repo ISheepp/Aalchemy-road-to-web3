@@ -2,6 +2,8 @@ import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { BuyMeACoffee } from "../typechain-types";
+import { Signer } from "ethers";
 
 describe("测试BuyMeACoffee合约", () => {
 
@@ -30,18 +32,14 @@ describe("测试BuyMeACoffee合约", () => {
     it("测试捐赠咖啡方法", async () => {
         const { contract, owner, other1, other2 } = await loadFixture(deploy);
         // other1 捐赠
-        const option = {
-            value: ethers.utils.parseEther("0.01")
-        }
-        // 换个account测试
-        const result = await contract.connect(other1).buyCoffee("hi i love you", "ISheep", option);
+        const receipt = await buyCoffeeWithWallet(contract, other1);
         // console.log(result);
 
         const contractBalance = await ethers.provider.getBalance(contract.address);
         // 测试合约的balance是否一致
         expect('0.01').to.equal(ethers.utils.formatEther(contractBalance));
         // 测试event 使用原始ethers测试
-        
+
         // const receipt = await ethers.provider.getTransactionReceipt(result.hash);
         // const interface1 = new ethers.utils.Interface(["event NewMemo(address indexed from,uint256 timestamp,string name,string message);"]);
         // const data = receipt.logs[0].data;
@@ -54,12 +52,34 @@ describe("测试BuyMeACoffee合约", () => {
         // expect(event.amount.toString()).to.equal(<amount-BigNumber >.toString());
 
         // 使用chai-matcher测试event
-        await expect(result).to.emit(contract, "NewMemo")
-            .withArgs(other1.address,anyValue,"ISheep","hi i love you");
+        await expect(receipt).to.emit(contract, "NewMemo")
+            .withArgs(other1.address, anyValue, "ISheep", "hi i love you");
 
 
+    })
+
+    it("测试获取所有Memo", async () => {
+        const { contract, owner, other1, other2 } = await loadFixture(deploy);
+        const receipt = await buyCoffeeWithWallet(contract, other1);
+        const receipt1 = await buyCoffeeWithWallet(contract, other2);
+        
+        await receipt.wait();
+        
+        let memos: Array<BuyMeACoffee.MemoStructOutput>  = await contract.getMemos();
+        memos.forEach((memo)=>{
+            console.log(memo);            
+        })
     })
 
 
 
 })
+
+// 购买咖啡
+async function buyCoffeeWithWallet(contract: BuyMeACoffee, address: Signer) {
+    const option = {
+        value: ethers.utils.parseEther("0.01")
+    };
+    const receipt = await contract.connect(address).buyCoffee("hi i love you", "ISheep", option);
+    return receipt;
+}
