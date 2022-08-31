@@ -7,6 +7,7 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "hardhat-gas-reporter";
+import "@nomiclabs/hardhat-etherscan";
 
 // task
 import './tasks/utils/accounts';
@@ -39,6 +40,11 @@ const config: HardhatUserConfig = {
 		coinmarketcap: COINMARKETCAP_API_KEY,
 		maxMethodDiff: 10,
 	},
+	etherscan: {
+		// Your API key for Etherscan
+		// Obtain one at https://etherscan.io/
+		apiKey: "YOUR_ETHERSCAN_API_KEY"
+	}
 
 
 };

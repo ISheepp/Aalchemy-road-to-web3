@@ -1,7 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-contract BuyMeACoffee {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract BuyMeACoffee is Ownable {
     // 当留言被创造的时候释放
     event NewMemo(
         address indexed from,
@@ -13,7 +15,7 @@ contract BuyMeACoffee {
     error CallFailed(address from);
 
     // 合约的部署者
-    address payable private owner;
+    address payable private thisOwner;
 
     // 留言的结构体
     struct Memo {
@@ -28,7 +30,7 @@ contract BuyMeACoffee {
 
     // when deployed set owner by contract caller
     constructor() {
-        owner = payable(msg.sender);
+        thisOwner = payable(msg.sender);
     }
 
     /**
@@ -58,13 +60,17 @@ contract BuyMeACoffee {
      * @dev 提现，目前只支持提现至owner
      */
     function withdrawTips() public {
-        (bool result, ) = owner.call{value: address(this).balance}("");
+        (bool result, ) = thisOwner.call{value: address(this).balance}("");
         if (!result) {
             revert CallFailed(msg.sender);
         }
     }
 
     function getOwner() public view returns (address) {
-        return owner;
+        return thisOwner;
+    }
+
+    function changeOwner(address payable _addr) public onlyOwner {
+        thisOwner = _addr;
     }
 }
