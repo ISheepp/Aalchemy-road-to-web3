@@ -16,10 +16,13 @@ describe("测试BuyMeACoffee合约", () => {
         const contract = await contractFactory.deploy();
         // 创建3个accounts
         const [owner, other1, other2] = await ethers.getSigners();
+        console.log("==============DEPLOY================");
+
         console.log(`deploy finished on address: ${contract.address}`);
         console.log(`合约部署账号：${owner.address}`);
         console.log(`测试账号1：${other1.address}`);
         console.log(`测试账号2：${other2.address}`);
+        console.log("==============DEPLOY================");
         return { contract, owner, other1, other2 };
     }
 
@@ -37,7 +40,7 @@ describe("测试BuyMeACoffee合约", () => {
 
         const contractBalance = await ethers.provider.getBalance(contract.address);
         // 测试合约的balance是否一致
-        expect('0.01').to.equal(ethers.utils.formatEther(contractBalance));
+        expect('1.0').to.equal(ethers.utils.formatEther(contractBalance));
         // 测试event 使用原始ethers测试
 
         // const receipt = await ethers.provider.getTransactionReceipt(result.hash);
@@ -62,13 +65,33 @@ describe("测试BuyMeACoffee合约", () => {
         const { contract, owner, other1, other2 } = await loadFixture(deploy);
         const receipt = await buyCoffeeWithWallet(contract, other1);
         const receipt1 = await buyCoffeeWithWallet(contract, other2);
-        
+
         await receipt.wait();
-        
-        let memos: Array<BuyMeACoffee.MemoStructOutput>  = await contract.getMemos();
-        memos.forEach((memo)=>{
-            console.log(memo);            
+
+        let memos: Array<BuyMeACoffee.MemoStructOutput> = await contract.getMemos();
+        memos.forEach((memo) => {
+            console.log(memo);
         })
+    })
+
+    it(`测试withdraw`, async () => {
+        const { contract, owner, other1, other2 } = await loadFixture(deploy);
+        console.log(`提现之前的余额：${ethers.utils.formatEther(await owner.getBalance())}`);
+
+        const receipt = await buyCoffeeWithWallet(contract, other1);
+        const receipt2 = await buyCoffeeWithWallet(contract, other2);
+        await contract.withdrawTips();
+        console.log(`提现之后的余额：${ethers.utils.formatEther(await owner.getBalance())}`);
+
+    })
+
+    it(`测试change owner`,async () => {
+        const { contract, owner, other1, other2 } = await loadFixture(deploy);
+        // 使用不是owner调用change方法
+        // const receipt = await contract.connect(other1).changeOwner(await other2.getAddress());
+        await expect(contract.connect(other1).changeOwner(await other2.getAddress())).to.be.reverted;
+        await expect(contract.connect(owner).changeOwner(await other2.getAddress())).to.not.be.reverted;
+        expect(await contract.getOwner()).to.equal(await other2.getAddress());
     })
 
 
@@ -78,7 +101,7 @@ describe("测试BuyMeACoffee合约", () => {
 // 购买咖啡
 async function buyCoffeeWithWallet(contract: BuyMeACoffee, address: Signer) {
     const option = {
-        value: ethers.utils.parseEther("0.01")
+        value: ethers.utils.parseEther("1")
     };
     const receipt = await contract.connect(address).buyCoffee("hi i love you", "ISheep", option);
     return receipt;

@@ -7,7 +7,8 @@ import styles from '../styles/Home.module.css'
 
 export default function Home() {
   // Contract Address & ABI
-  const contractAddress = "0x7bbe97710e416eA3B4E824F445A38e93d67d05FC";
+  // 更新了合约地址 新增切换owner的功能
+  const contractAddress = "0x49F333d411ce56FD89344E0d07fA8E827ECB16A1";
   const contractABI = abi.abi;
 
   // Component state
