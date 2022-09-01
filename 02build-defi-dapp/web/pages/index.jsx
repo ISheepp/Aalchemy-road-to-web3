@@ -120,8 +120,8 @@ export default function Home() {
     }
   }
 
-  const onNewOwnerChange =  {
-    
+  const onNewOwnerChange = (event)=> {
+    setNewOwner(event.target.value);
   }
 
   const changeOwner = async () => {
@@ -275,6 +275,12 @@ export default function Home() {
                   withdrawTips
                 </button>
               </div>
+              <input
+                  id="name"
+                  type="text"
+                  placeholder="address"
+                  onChange={onNewOwnerChange}
+                />
               <div>
                 <button
                   type="button"

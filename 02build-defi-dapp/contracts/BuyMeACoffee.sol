@@ -72,5 +72,7 @@ contract BuyMeACoffee is Ownable {
 
     function changeOwner(address payable _addr) public onlyOwner {
         thisOwner = _addr;
+        // 修改Ownable.sol的owner
+        transferOwnership(_addr);
     }
 }
