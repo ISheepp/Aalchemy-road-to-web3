@@ -16,6 +16,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [memos, setMemos] = useState([]);
+  const [newOwner, setNewOwner] = useState("");
 
   const onNameChange = (event) => {
     setName(event.target.value);
@@ -110,6 +111,32 @@ export default function Home() {
           signer
         );
         const receipt = await buyMeACoffee.withdrawTips();
+        await receipt.wait();
+
+
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const onNewOwnerChange =  {
+    
+  }
+
+  const changeOwner = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum, "any");
+        const signer = provider.getSigner();
+        const buyMeACoffee = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+        const receipt = await buyMeACoffee.changeOwner(newOwner);
         await receipt.wait();
 
 
@@ -246,6 +273,14 @@ export default function Home() {
                   onClick={withDraw}
                 >
                   withdrawTips
+                </button>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={changeOwner}
+                >
+                  changeOwner
                 </button>
               </div>
             </form>
