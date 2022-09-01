@@ -30,7 +30,7 @@ export default function Home() {
     try {
       const { ethereum } = window;
 
-      const accounts = await ethereum.request({method: 'eth_accounts'})
+      const accounts = await ethereum.request({ method: 'eth_accounts' })
       console.log("accounts: ", accounts);
 
       if (accounts.length > 0) {
@@ -46,7 +46,7 @@ export default function Home() {
 
   const connectWallet = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (!ethereum) {
         console.log("please install MetaMask");
@@ -64,7 +64,7 @@ export default function Home() {
 
   const buyCoffee = async () => {
     try {
-      const {ethereum} = window;
+      const { ethereum } = window;
 
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum, "any");
@@ -79,7 +79,7 @@ export default function Home() {
         const coffeeTxn = await buyMeACoffee.buyCoffee(
           name ? name : "anon",
           message ? message : "Enjoy your coffee!",
-          {value: ethers.utils.parseEther("0.001")}
+          { value: ethers.utils.parseEther("0.001") }
         );
 
         await coffeeTxn.wait();
@@ -97,6 +97,28 @@ export default function Home() {
     }
   };
 
+  const withDraw = async () => {
+    try {
+      const { ethereum } = window;
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum, "any");
+        const signer = provider.getSigner();
+        const buyMeACoffee = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+        const receipt = await buyMeACoffee.withdrawTips();
+        await receipt.wait();
+
+
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // Function to fetch all memos stored on-chain.
   const getMemos = async () => {
     try {
@@ -109,7 +131,7 @@ export default function Home() {
           contractABI,
           signer
         );
-        
+
         console.log("fetching memos from the blockchain..");
         const memos = await buyMeACoffee.getMemos();
         console.log("fetched!");
@@ -117,12 +139,12 @@ export default function Home() {
       } else {
         console.log("Metamask is not connected");
       }
-      
+
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   useEffect(() => {
     let buyMeACoffee;
     isWalletConnected();
@@ -143,7 +165,7 @@ export default function Home() {
       ]);
     };
 
-    const {ethereum} = window;
+    const { ethereum } = window;
 
     // Listen for new memo events.
     if (ethereum) {
@@ -164,7 +186,7 @@ export default function Home() {
       }
     }
   }, []);
-  
+
   return (
     <div className={styles.container}>
       <Head>
@@ -177,7 +199,7 @@ export default function Home() {
         <h1 className={styles.title}>
           Buy Albert a Coffee!
         </h1>
-        
+
         {currentAccount ? (
           <div>
             <form>
@@ -185,21 +207,21 @@ export default function Home() {
                 <label>
                   Name
                 </label>
-                <br/>
-                
+                <br />
+
                 <input
                   id="name"
                   type="text"
                   placeholder="anon"
                   onChange={onNameChange}
-                  />
+                />
               </div>
-              <br/>
+              <br />
               <div>
                 <label>
                   Send Albert a message
                 </label>
-                <br/>
+                <br />
 
                 <textarea
                   rows={3}
@@ -218,6 +240,14 @@ export default function Home() {
                   Send 1 Coffee for 0.001ETH
                 </button>
               </div>
+              <div>
+                <button
+                  type="button"
+                  onClick={withDraw}
+                >
+                  withdrawTips
+                </button>
+              </div>
             </form>
           </div>
         ) : (
@@ -229,8 +259,8 @@ export default function Home() {
 
       {currentAccount && (memos.map((memo, idx) => {
         return (
-          <div key={idx} style={{border:"2px solid", "borderRadius":"5px", padding: "5px", margin: "5px"}}>
-            <p style={{"fontWeight":"bold"}}>"{memo.message}"</p>
+          <div key={idx} style={{ border: "2px solid", "borderRadius": "5px", padding: "5px", margin: "5px" }}>
+            <p style={{ "fontWeight": "bold" }}>"{memo.message}"</p>
             <p>From: {memo.name} at {memo.timestamp.toString()}</p>
           </div>
         )
