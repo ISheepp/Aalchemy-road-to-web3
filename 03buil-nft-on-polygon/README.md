@@ -9,6 +9,18 @@ week1 完成的是一个部署在 Ethereum ，只存储了 metadata 访问地址
 
 ## 步骤
 
+## 成果
+address: 0xE8aD93444232FC92515F63eA13A8a6A81ABFcA12
+
+我使用struct新增了一些属性 
+
+[opensea地址](https://testnets.opensea.io/zh-CN/assets/mumbai/0xe8ad93444232fc92515f63ea13a8a6a81abfca12/1)
+
+创建
+![](./img/create.png)
+
+训练
+![](./img/train.png)
 
 ## 解决 etherscan 插件验证失败的问题
 
