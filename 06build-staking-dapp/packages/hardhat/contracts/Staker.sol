@@ -7,13 +7,20 @@ import "./ExampleExternalContract.sol";
 contract Staker {
     ExampleExternalContract public exampleExternalContract;
 
-    mapping(address=>uint256) public balances;
-    mapping(address=>uint256) public depositTimestamps;
+    mapping(address => uint256) public balances;
+    mapping(address => uint256) public depositTimestamps;
 
+    // 每秒钟的利息
     uint256 public constant rewardRatePerSecond = 0.1 ether;
+    // 定义了质押的开始和结束时间
     uint256 public withdrawalDeadline = block.timestamp + 120 seconds;
     uint256 public claimDeadline = block.timestamp + 240 seconds;
+    // 初始区块
     uint256 public currentBlock = 0;
+
+    event Stake(address indexed sender, uint256 amount);
+    event Reveived(address, uint256);
+    event Execute(address indexed sender, uint256 amount);
 
     constructor(address exampleExternalContractAddress) {
         exampleExternalContract = ExampleExternalContract(
@@ -21,17 +28,98 @@ contract Staker {
         );
     }
 
-    // Collect funds in a payable `stake()` function and track individual `balances` with a mapping:
-    // ( Make sure to add a `Stake(address,uint256)` event and emit it for the frontend <List/> display )
+    modifier withdrawalDeadlineReached(bool requireReached) {
+        uint256 timeRemaining = withdrawalTimeLeft();
+        if (requireReached) {
+            require(timeRemaining == 0, "withdrawal period is not reached yet");
+        } else {
+            require(timeRemaining > 0, "withdrawal period has been reached");
+        }
+        _;
+    }
 
-    // After some `deadline` allow anyone to call an `execute()` function
-    // If the deadline has passed and the threshold is met, it should call `exampleExternalContract.complete{value: address(this).balance}()`
+    modifier claimDeadlineReached(bool requireReached) {
+        uint256 timeRemaining = claimPeriodLeft();
+        if (requireReached) {
+            require(timeRemaining == 0, "Claim deadline is not reached yet");
+        } else {
+            require(timeRemaining > 0, "Claim deadline has been reached");
+        }
+        _;
+    }
 
-    // If the `threshold` was not met, allow everyone to call a `withdraw()` function
+    modifier notCompleted() {
+        bool completed = exampleExternalContract.completed();
+        require(!completed, "Stake already completed!");
+        _;
+    }
 
-    // Add a `withdraw()` function to let users withdraw their balance
+    /**
+     * @dev 返回取款剩余的时间
+     */
+    function withdrawalTimeLeft() public view returns (uint256) {
+        if (block.timestamp >= withdrawalDeadline) {
+            return (0);
+        } else {
+            return (withdrawalDeadline - block.timestamp);
+        }
+    }
 
-    // Add a `timeLeft()` view function that returns the time left before the deadline for the frontend
+    /**
+     * @dev 返回索取剩余时间
+     */
+    function claimPeriodLeft() public view returns (uint256) {
+        if (block.timestamp >= claimDeadline) {
+            return (0);
+        } else {
+            return (claimDeadline - block.timestamp);
+        }
+    }
 
-    // Add the `receive()` special function that receives eth and calls stake()
+    /**
+     * @dev 质押函数 只能质押ETH
+     */
+    function stake()
+        public
+        payable
+        withdrawalDeadlineReached(false)
+        claimDeadlineReached(false)
+    {
+        balances[msg.sender] = balances[msg.sender] + msg.value;
+        depositTimestamps[msg.sender] = block.timestamp;
+        emit Stake(msg.sender, msg.value);
+    }
+
+    /**
+     * @dev 取款
+     */
+    function withdraw()
+        public
+        withdrawalDeadlineReached(true)
+        claimDeadlineReached(false)
+        notCompleted
+    {
+        require(balances[msg.sender] > 0, "You have no balances to withdraw!");
+        uint individualBalance = balances[msg.sender];
+        // 最终withdraw的数量
+        uint individualRewards = individualBalance + ((block.timestamp - depositTimestamps[msg.sender]) * rewardRatePerSecond);
+        balances[msg.sender] = 0;
+
+        // Transfer ETH
+        (bool result, ) = msg.sender.call{value:individualRewards}("");
+        require(result, "withdraw failed :( ");
+    }
+
+    function execute() public claimDeadlineReached(true) notCompleted {
+        uint contractBalance = address(this).balance;
+        exampleExternalContract.complete{value: address(this).balance}();
+    }
+
+    function killTime() public {
+        currentBlock = block.timestamp;
+    }
+
+    receive() external payable {
+        emit Reveived(msg.sender, msg.value);
+    }
 }
